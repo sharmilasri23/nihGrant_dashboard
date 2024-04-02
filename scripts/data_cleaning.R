@@ -10,6 +10,7 @@ pacman::p_load(
   scales,
   googledrive,
   googlesheets4,
+  jsonlite,
   ggplot2,
   plotly,
   shiny,
@@ -17,7 +18,13 @@ pacman::p_load(
   flextable,
   purrr,
   DT
-  ) 
+) 
+
+
+# Authenticate with Google Sheets using the service account
+sa_cred <- jsonlite::fromJSON(Sys.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON"), simplifyVector = TRUE)
+gs4_auth_configure(path = NULL)
+gs4_auth(email = sa_cred$client_email, path = NULL, scopes = "https://www.googleapis.com/auth/spreadsheets")
 
 
 # Import data -------------------------------------------------------------

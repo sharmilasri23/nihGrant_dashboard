@@ -1,0 +1,21 @@
+name: Monthly Sheet Access
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'  # Runs at 12:00 AM on the first of every month
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up R environment
+      uses: r-lib/actions/setup-r@v1
+
+    - name: Run R script to access Google Sheets
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+      run: |
+        Rscript app.R
