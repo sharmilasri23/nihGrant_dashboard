@@ -191,7 +191,7 @@ agihan_dan_belanja_table2 <- agihan_dan_belanja_table %>%
 agihan_dan_belanja_table2
 
 
-# Sub tables --------------------------------------------------------------
+# Sub tables (summarize_table1) --------------------------------------------------------------
 
 summarize_table <- rio_df_agihan_dan_belanja_cluster %>%
   select(kluster, total_belanja1, total_peruntukan1)
@@ -1088,4 +1088,11 @@ ptj_table10 <- ptj_table10 %>%
   bg(j = 2, i = ~ total_belanja10 > total_peruntukan10, part = "body", bg = "#DDB8A6") %>%
   bg(j = 3, i = ~ total_peruntukan10 > total_belanja10, part = "body", bg = "#C1D7C1")
 
-
+## Panel 3
+rio_df_agihan_dan_belanja_new <- rio_df_agihan_dan_belanja %>%
+  select(tajuk, ketua_projek, sumber, ptj, kluster) %>%
+  rename(Project = tajuk,
+         Cluster = kluster,
+         `Head of the project` = ketua_projek,
+         Source = sumber,
+         Institute = ptj)

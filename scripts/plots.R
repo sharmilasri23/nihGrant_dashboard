@@ -16,7 +16,8 @@ pacman::p_load(
   shinythemes,
   flextable,
   purrr,
-  DT
+  DT,
+  waterfalls
 ) 
 
 
@@ -814,3 +815,15 @@ ptj10 <- ggplot(rio_df_agihan_dan_belanja_ptj10 %>%
   scale_fill_manual(values = c("Belanja_oleh_NIH" = "#C1D7C1","Baki_oleh_NIH" = "#DDB8A6"),
                     labels = c(Belanja_oleh_NIH = "Belanja daripada Agihan 10", 
                                Baki_oleh_NIH = "Baki daripada Agihan 10"))
+
+## Panel 3
+merged_df2 <- bind_rows(rio_df_2021_new, rio_df_2022_new, rio_df_2023_new, 
+                        rio_df_2024_new, rio_df_2025_new) %>%
+  arrange(desc(Allocation)) %>%
+  mutate(Allocation = dollar(Allocation, prefix = "MYR")) 
+
+scatter_plot <- ggplot(merged_df2, aes(x = Allocation, y = Cluster)) +
+  geom_point() +
+  labs(title = "Scatter Plot of Allocation by Cluster", x = "Allocation (MYR)", y = "Cluster") +
+  theme_minimal()
+

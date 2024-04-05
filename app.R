@@ -1,4 +1,5 @@
 
+
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
   pacman, 
@@ -16,6 +17,7 @@ pacman::p_load(
   flextable,
   purrr,
   DT)
+
 
 
 # Call in data
@@ -384,8 +386,6 @@ server <- function(input, output, session) {
       }
     }
   })
-
-
 
 observeEvent(input$next_page_btn, {
   updateNavbarPage(session, "Dashboard", selected = "Page 2")

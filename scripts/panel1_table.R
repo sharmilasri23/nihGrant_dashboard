@@ -5,7 +5,7 @@ pacman::p_load(
   scales
 )
 
-#cratea subfiltered dataset
+#create subfiltered dataset
 rio_df_2021_new <- rio_df_sambungan %>%
   select(tajuk_projek, kluster, jabatan, sumber_peruntukan, x2021) %>%
   rename(Project = tajuk_projek,
@@ -51,3 +51,5 @@ merged_df2 <- bind_rows(rio_df_2021_new, rio_df_2022_new, rio_df_2023_new,
   arrange(desc(Allocation)) %>%
   mutate(Allocation = dollar(Allocation, prefix = "MYR")) 
   
+
+
