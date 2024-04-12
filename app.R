@@ -1,27 +1,22 @@
-
-
-if (!require("pacman")) install.packages("pacman")
-pacman::p_load(
-  pacman, 
-  rio,
-  tidyverse,
-  here,
-  janitor,
-  scales,
-  dplyr,
-  ggplot2,
-  plotly,
-  shiny,
-  shinydashboard,
-  shinythemes,
-  flextable,
-  purrr,
-  DT)
-
+#load packages
+library(rio)
+library(here)
+library(janitor)
+library(scales)
+library(plotly)
+library(shiny)
+library(shinydashboard)
+library(shinythemes)
+library(flextable)
+library(DT)
+library(ggplot2)
+library(purrr)
+library(dplyr)
+library(tidyr)
+library(stringr)
 
 
 # Call in data
-
 source("scripts/data_cleaning.R")
 
 # Shiny UI

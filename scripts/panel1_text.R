@@ -1,8 +1,11 @@
 #load packages
 #load packages
-pacman::p_load(
-  tidyverse
-)
+library(rio)
+library(here)
+library(ggplot2)
+library(purrr)
+library(dplyr)
+library(tidyr)
 
 #summarise cards
 summary_cards <- rio_df_simple_panel %>%

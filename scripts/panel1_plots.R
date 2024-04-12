@@ -1,10 +1,12 @@
 #load packages
-pacman::p_load(
-  plotly,
-  tidyverse,
-  xts,
-  scales
-)
+library(rio)
+library(here)
+library(ggplot2)
+library(purrr)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(plotly)
 
 ## Trend line (2021, 2022, 2023, 2024)
 #by Cluster- allocation

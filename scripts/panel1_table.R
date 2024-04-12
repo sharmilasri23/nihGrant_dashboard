@@ -1,9 +1,12 @@
 #load packages
-pacman::p_load(
-  DT,
-  tidyverse,
-  scales
-)
+library(rio)
+library(here)
+library(ggplot2)
+library(purrr)
+library(dplyr)
+library(tidyr)
+library(DT)
+library(scales)
 
 #create subfiltered dataset
 rio_df_2021_new <- rio_df_sambungan %>%

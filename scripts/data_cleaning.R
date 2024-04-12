@@ -1,54 +1,48 @@
 # Load Packages -----------------------------------------------------------
-if (!require("pacman")) install.packages("pacman")
-pacman::p_load(
-  pacman, 
-  rio,
-  tidyverse,
-  here,
-  janitor,
-  dplyr,
-  scales,
-  googledrive,
-  googlesheets4,
-  jsonlite,
-  ggplot2,
-  plotly,
-  shiny,
-  shinythemes,
-  flextable,
-  purrr,
-  DT
-) 
+#load packages
+library(rio)
+library(here)
+library(ggplot2)
+library(purrr)
+library(dplyr)
+library(tidyr)
+library(janitor)
+library(scales)
+library(plotly)
+library(shiny)
+library(shinydashboard)
+library(shinythemes)
+library(flextable)
+library(DT)
+library(googledrive)
+library(googlesheets4)
+library(jsonlite)
+library(stringr)
 
+# Function to read sheet
+read_google_sheet <- function(sheet_id, sheet_name) {
+  read_sheet(ss = sheet_id, sheet = sheet_name)
+}
 
 # Authenticate with Google Sheets using the service account
-sa_cred <- jsonlite::fromJSON(Sys.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON"), simplifyVector = TRUE)
-gs4_auth_configure(path = NULL)
-gs4_auth(email = sa_cred$client_email, path = NULL, scopes = "https://www.googleapis.com/auth/spreadsheets")
-
+gs4_auth(path = Sys.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
 
 # Import data -------------------------------------------------------------
 # Line Project RMK 12 dataset
-rio_df_sambungan <- read_sheet("https://docs.google.com/spreadsheets/d/1cVZlEypR0gK9VZUf2aQkdGMj1n73_iwbx1dLKxnZvQY/edit?usp=sharing",
-                           sheet = "Sambungan")
-rio_df_2021 <- read_sheet("https://docs.google.com/spreadsheets/d/1cVZlEypR0gK9VZUf2aQkdGMj1n73_iwbx1dLKxnZvQY/edit?usp=sharing",
-                               sheet = "2021")
-rio_df_2022 <- read_sheet("https://docs.google.com/spreadsheets/d/1cVZlEypR0gK9VZUf2aQkdGMj1n73_iwbx1dLKxnZvQY/edit?usp=sharing",
-                               sheet = "2022")
-rio_df_2023 <- read_sheet("https://docs.google.com/spreadsheets/d/1cVZlEypR0gK9VZUf2aQkdGMj1n73_iwbx1dLKxnZvQY/edit?usp=sharing",
-                               sheet = "2023")
-rio_df_2024 <- read_sheet("https://docs.google.com/spreadsheets/d/1cVZlEypR0gK9VZUf2aQkdGMj1n73_iwbx1dLKxnZvQY/edit?usp=sharing",
-                               sheet = "2024")
-rio_df_2025 <- read_sheet("https://docs.google.com/spreadsheets/d/1cVZlEypR0gK9VZUf2aQkdGMj1n73_iwbx1dLKxnZvQY/edit?usp=sharing",
-                          sheet = "2025")
+sheet_id <- "1cVZlEypR0gK9VZUf2aQkdGMj1n73_iwbx1dLKxnZvQY"
+rio_df_sambungan <- read_google_sheet(sheet_id, "Sambungan")
+rio_df_2021 <- read_google_sheet(sheet_id, "2021")
+rio_df_2022 <- read_google_sheet(sheet_id, "2022")
+rio_df_2023 <- read_google_sheet(sheet_id, "2023")
+rio_df_2024 <- read_google_sheet(sheet_id, "2024")
+rio_df_2025 <- read_google_sheet(sheet_id, "2025")
 
 # Panel Geran 2023 dataset
-rio_df_simple_panel <- read_sheet("https://docs.google.com/spreadsheets/d/19P0rOIlwc9MiEIyQqE7TxM0e0RvvfXImP_vpFOYSL78/edit?usp=sharing",
-                          sheet = "simple panel")
-rio_df_agihan_dan_belanja <- read_sheet("https://docs.google.com/spreadsheets/d/19P0rOIlwc9MiEIyQqE7TxM0e0RvvfXImP_vpFOYSL78/edit?usp=sharing",
-                                  sheet = "Agihan & Belanja")
-rio_df_gov <- read_sheet("https://docs.google.com/spreadsheets/d/19P0rOIlwc9MiEIyQqE7TxM0e0RvvfXImP_vpFOYSL78/edit?usp=sharing",
-                                  sheet = "GOV")
+sheet_id <- "19P0rOIlwc9MiEIyQqE7TxM0e0RvvfXImP_vpFOYSL78"
+rio_df_simple_panel <- read_google_sheet(sheet_id, "simple panel")
+rio_df_agihan_dan_belanja <- read_google_sheet(sheet_id, "Agihan & Belanja")
+rio_df_gov <- read_google_sheet(sheet_id, "GOV")
+
 
 # Data cleaning ---------------------------------------------
 # Line Project RMK 12 dataset
@@ -135,8 +129,7 @@ rio_df_simple_panel <- rio_df_simple_panel %>%
   clean_names()  %>%
   unnest(c(peruntukan, pulang_balik, belanja, baki)) %>%
   mutate(tahun_mula = as.Date(as.numeric(tahun_mula), origin = "1899-12-30"),
-         tahun_tamat = as.Date(as.numeric(tahun_tamat), origin = "1899-12-30"),
-         year = as.Date(year, format = "%Y")) %>%
+         tahun_tamat = as.Date(as.numeric(tahun_tamat), origin = "1899-12-30")) %>%
   mutate_at(vars(peruntukan, pulang_balik, belanja, baki),
             list(~ as.numeric(.))) %>%
   select(1:20) %>%
@@ -174,4 +167,8 @@ rio_df_gov_2024 <- rio_df_gov %>%
   clean_names() %>%
   as_tibble() %>%
   mutate(peruntukan = as.numeric(str_replace_all(peruntukan, "[^0-9.]", "")))
+
+#create a dummy oinput panel
+# Assuming you want to list years from 2021 to 2025
+years <- as.character(2021:format(as.Date("2025-12-31"), "%Y"))
 

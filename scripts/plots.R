@@ -1,29 +1,24 @@
-
-if (!require("pacman")) install.packages("pacman")
-pacman::p_load(
-  pacman, 
-  rio,
-  tidyverse,
-  here,
-  janitor,
-  dplyr,
-  scales,
-  googledrive,
-  googlesheets4,
-  ggplot2,
-  plotly,
-  shiny,
-  shinythemes,
-  flextable,
-  purrr,
-  DT,
-  waterfalls
-) 
-
+#load packages
+library(rio)
+library(here)
+library(ggplot2)
+library(purrr)
+library(dplyr)
+library(tidyr)
+library(janitor)
+library(scales)
+library(plotly)
+library(shiny)
+library(shinydashboard)
+library(shinythemes)
+library(flextable)
+library(DT)
+library(googledrive)
+library(googlesheets4)
+library(jsonlite)
+library(waterfalls)
 
 # Data visualizations -----------------------------------------------------
-
-
 ## 3 level (GOV, NIH_belanja, NIH_baki)
 rio_df_simple_panel_cluster <- rio_df_simple_panel %>%
   group_by(cluster) %>%
