@@ -58,6 +58,7 @@ rio_df_sambungan <- rio_df_sambungan %>%
             list(~ as.numeric(.))) %>%
   select(1:16)  # Keep only the first 16 columns
 
+
 ## Sheet :  2021
 rio_df_2021 <- rio_df_2021 %>%
   row_to_names(row_number = 1)  %>% 
@@ -133,7 +134,7 @@ rio_df_simple_panel <- rio_df_simple_panel %>%
   mutate_at(vars(peruntukan, pulang_balik, belanja, baki),
             list(~ as.numeric(.))) %>%
   select(1:20) %>%
-  fill(nmrr, .direction = "down")
+  fill(nmrr, .direction = "down") #fill all empty columns downwards
 
 
 ## Sheet : Agihan & Belanja
@@ -165,10 +166,15 @@ rio_df_gov_2023 <- rio_df_gov %>%
 rio_df_gov_2024 <- rio_df_gov %>% 
   slice(14:23) %>%
   clean_names() %>%
-  as_tibble() %>%
+  as_tibble() %>% #it converts the object into a tibble while preserving its structure and data
   mutate(peruntukan = as.numeric(str_replace_all(peruntukan, "[^0-9.]", "")))
 
 #create a dummy oinput panel
 # Assuming you want to list years from 2021 to 2025
 years <- as.character(2021:format(as.Date("2025-12-31"), "%Y"))
 
+#Clear environment
+rm(list = ls())
+
+#Clear console
+#ctrl + L

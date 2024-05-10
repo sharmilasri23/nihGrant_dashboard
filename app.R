@@ -17,7 +17,8 @@ library(stringr)
 
 
 # Call in data
-source("scripts/data_cleaning.R")
+#source("scripts/data_cleaning.R")
+
 
 # Shiny UI
 ui <- fluidPage(
@@ -30,7 +31,7 @@ ui <- fluidPage(
     id = "main_navbar",
     
     tabPanel(
-      "Funding Overview",
+      "Allocation Overview",
       div(
         class = "panel-container",
         style = "overflow-y: auto; max-height: 100vh;",  # Contain the panel within the viewport
@@ -62,6 +63,14 @@ ui <- fluidPage(
             selectInput("funding_type", "Select Funding Type",
                         choices = c("Overall", "Cluster", "Institute"),
                         selected = "Overall")
+          )
+        ),
+        fluidRow(
+          column(
+            6,
+            selectInput("year_select", "Select Year",
+                        choices = c(2021, 2022, 2023, 2024, 2025),
+                        selected = 2021)
           )
         ),
         fluidRow(
@@ -107,54 +116,60 @@ ui <- fluidPage(
           12,
           plotOutput("bar_plot")
         )
+      ),
+      fluidRow(
+        column(
+          12,
+          DTOutput("overspent_table")
+        )
       )
     ),
     
     # Panel 3: Spending Breakdown (updated)
-tabPanel(
-  "Spending Breakdown",
-  fluidRow(
-    column(
-      4,
-      selectInput("table_selector", "Select Table",
-                  choices = c("Perjalanan dan Sara Hidup [OS21000]",
-                              "Perhubungan Dan Utiliti [OS23000]", 
-                              "Sewaan [OS24000]", 
-                              "Bahan-bahan Makanan dan Minuman [OS25000]",
-                              "Bekalan Bahan Mentah dan Bahan-bahan Untuk penyelidikan [OS26000]",
-                              "Bekalan dan Bahan Penyelidikan [OS27000]", 
-                              "Selenggaraan Dan Pembaikan Kecil [OS28000]", 
-                              "Khidmat Ikhtisas [35000]", 
-                              "MySTEP [OS29000]", 
-                              " Harta Modal [OS30000]"),
-                  selected = "Perjalanan dan Sara Hidup [OS21000]")
-    ),
-    column(
-      4,
-      selectInput("funding_entity_selector", "Select Funding Entity",
-                  choices = c("Cluster", "Institute"),
-                  selected = "Cluster")
-    ),
-    column(
-      4,
-      selectInput("plot_year", "Select Year",
-                  choices = c("All", years),
-                  selected = "All")
-    )
-  ),
-  fluidRow(
-    column(
-      6, 
-      plotOutput("plot_display")
-    ),
-    column(
-      6, 
-      uiOutput("table_display")
+    tabPanel(
+      "Spending Breakdown",
+      fluidRow(
+        column(
+          4,
+          selectInput("table_selector", "Select Table",
+                      choices = c("Perjalanan dan Sara Hidup [OS21000]",
+                                  "Perhubungan Dan Utiliti [OS23000]", 
+                                  "Sewaan [OS24000]", 
+                                  "Bahan-bahan Makanan dan Minuman [OS25000]",
+                                  "Bekalan Bahan Mentah dan Bahan-bahan Untuk penyelidikan [OS26000]",
+                                  "Bekalan dan Bahan Penyelidikan [OS27000]", 
+                                  "Selenggaraan Dan Pembaikan Kecil [OS28000]", 
+                                  "Khidmat Ikhtisas [35000]", 
+                                  "MySTEP [OS29000]", 
+                                  " Harta Modal [OS30000]"),
+                      selected = "Perjalanan dan Sara Hidup [OS21000]")
+        ),
+        column(
+          4,
+          selectInput("funding_entity_selector", "Select Funding Entity",
+                      choices = c("Cluster", "Institute"),
+                      selected = "Cluster")
+        ),
+        column(
+          4,
+          selectInput("plot_year", "Select Year",
+                      choices = c("All", years),
+                      selected = "All")
+        )
+      ),
+      fluidRow(
+        column(
+          6, 
+          plotOutput("plot_display")
+        ),
+        column(
+          6, 
+          uiOutput("table_display")
+        )
+      )
     )
   )
 )
-    )
-  )
 
 # Shiny Server Side
 server <- function(input, output, session) {
@@ -162,8 +177,11 @@ server <- function(input, output, session) {
   source("scripts/panel1_plots.R")
   source("scripts/panel1_text.R")
   source("scripts/panel1_table.R")
-  source("scripts/plots.R")
-  source("scripts/tables.R")
+  source("scripts/panel2_plots.R")
+  source("scripts/panel2_table.R")
+  source("scripts/panel3_plots.R")
+  source("scripts/panel3_table.R")
+  
   
   # Panel 1: Funding Overview - Time Series Plot (continued)
   output$time_series_plot <- renderPlot({
@@ -206,8 +224,19 @@ server <- function(input, output, session) {
   
   # DT table
   output$data_table <- renderDT({
+    # Get the selected year from the dropdown
+    selected_year <- input$year_select
+    
+    # Retrieve the dataframe for the selected year
+    selected_df <- switch(selected_year,
+                          "2021" = rio_df_2021_new,
+                          "2022" = rio_df_2022_new,
+                          "2023" = rio_df_2023_new,
+                          "2024" = rio_df_2024_new,
+                          "2025" = rio_df_2025_new)
+    
     datatable(
-      merged_df2,
+      selected_df,
       extensions = 'Buttons',  # Enable extensions, including Buttons
       options = list(
         pageLength = 5,
@@ -220,7 +249,7 @@ server <- function(input, output, session) {
       rownames = FALSE  # Removes row names if not needed
     ) %>%
       formatStyle(
-        columns = 1:ncol(merged_df2),  # Apply to all columns or specify columns like c('column1', 'column2')
+        columns = 1:ncol(selected_df),  # Apply to all columns or specify columns like c('column1', 'column2')
         fontSize = '14px',  # Set font size
         fontWeight = 'normal'  # Set font weight
       )
@@ -242,6 +271,31 @@ server <- function(input, output, session) {
     } else if (input$funding_entity == "Institute" && input$plot_type == "Stacked Percentage") {
       plot_ptj_percent
     }
+  })
+  
+  # Overspent table
+  output$overspent_table <- renderDT({
+    
+    overspent_df  
+    
+    datatable(
+      overspent_df,
+      extensions = 'Buttons',  # Enable extensions, including Buttons
+      options = list(
+        pageLength = 5,
+        autoWidth = FALSE,
+        responsive = TRUE,
+        dom = 'Blfrtip',  # Layout: Buttons, Length changing, Filtering, Table, Information, Pagination
+        buttons = c('csv')  # Define buttons, here only CSV
+      ),
+      class = 'cell-border stripe hover',  # Adds cell borders, striped rows, and hover effect
+      rownames = FALSE  # Removes row names if not needed
+    ) %>%
+      formatStyle(
+        columns = 1:ncol(overspent_df),  # Apply to all columns or specify columns like c('column1', 'column2')
+        fontSize = '14px',  # Set font size
+        fontWeight = 'normal'  # Set font weight
+      )
   })
   
   # Panel 3: Spending Breakdown (updated)
@@ -381,11 +435,12 @@ server <- function(input, output, session) {
       }
     }
   })
-
-observeEvent(input$next_page_btn, {
-  updateNavbarPage(session, "Dashboard", selected = "Page 2")
-})
+  
+  observeEvent(input$next_page_btn, {
+    updateNavbarPage(session, "Dashboard", selected = "Page 2")
+  })
 }
 
 # Run the application
 shinyApp(ui = ui, server = server)
+
